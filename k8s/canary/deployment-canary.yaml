@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: devops-enterprise-api-canary
+  namespace: staging
+  labels:
+    app: devops-enterprise-api
+    track: canary
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: devops-enterprise-api
+      track: canary
+  template:
+    metadata:
+      labels:
+        app: devops-enterprise-api
+        track: canary
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      containers:
+      - name: api
+        image: <AWS_ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/devops-enterprise-api:BUILD_TAG
+        ports:
+        - containerPort: 8000
+        envFrom:
+        - configMapRef:
+            name: api-config
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5

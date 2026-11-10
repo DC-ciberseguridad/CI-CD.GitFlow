@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: devops-enterprise-api-stable
+  namespace: staging
+  labels:
+    app: devops-enterprise-api
+    track: stable
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: devops-enterprise-api
+      track: stable
+  template:
+    metadata:
+      labels:
+        app: devops-enterprise-api
+        track: stable
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      containers:
+      - name: api
+        image: 270876217576.dkr.ecr.us-east-1.amazonaws.com/devops-enterprise-api:staging-stable
+        ports:
+        - containerPort: 8000
+        envFrom:
+        - configMapRef:
+            name: api-config
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5

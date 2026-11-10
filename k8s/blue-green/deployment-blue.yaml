@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: devops-enterprise-api-blue
+  namespace: prod
+  labels:
+    app: devops-enterprise-api
+    version: blue
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: devops-enterprise-api
+      version: blue
+  template:
+    metadata:
+      labels:
+        app: devops-enterprise-api
+        version: blue
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      containers:
+      - name: api
+        image: 270876217576.dkr.ecr.us-east-1.amazonaws.com/devops-enterprise-api:prod-stable
+        ports:
+        - containerPort: 8000
+        envFrom:
+        - configMapRef:
+            name: api-config
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5
